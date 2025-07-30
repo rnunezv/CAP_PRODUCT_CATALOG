@@ -2,7 +2,7 @@
 namespace com.logali;
 
 // Tipo Personalizado
-type Name               : String(50);
+type Name : String(50);
 
 // Tipo Estructurado
 type Address {
@@ -14,57 +14,57 @@ type Address {
 };
 
 // Tipo Array
-type EmailsAddresses_01 : array of {
-    kind  : String;
-    email : String;
-};
+// type EmailsAddresses_01 : array of {
+//     kind  : String;
+//     email : String;
+// };
 
-// Tipo Estructurado
-type EmailsAddresses_02 {
-    kind  : String;
-    email : String;
-};
+// // Tipo Estructurado
+// type EmailsAddresses_02 {
+//     kind  : String;
+//     email : String;
+// };
 
-// Entidad
-entity Emails {
-    email_01 : EmailsAddresses_01;
-    email_02 : many EmailsAddresses_02;
-    email_03 : many {
-        kind  : String;
-        email : String;
-    }
-};
+// // Entidad
+// entity Emails {
+//     email_01 : EmailsAddresses_01;
+//     email_02 : many EmailsAddresses_02;
+//     email_03 : many {
+//         kind  : String;
+//         email : String;
+//     }
+// };
 
 
 //Enumeración
-type Gender             : String enum {
-    male;
-    female;
-};
+// type Gender             : String enum {
+//     male;
+//     female;
+// };
 
 
 // Entidad
-entity Order {
-    clientGender : Gender;
-    status       : Integer enum {
-        submitted = 1;
-        fulfiller = 2;
-        shipped = 3;
-        cancel = -1;
-    };
-    Priority     : String @assert.range enum {
-        high;
-        medium;
-        low;
-    };
-};
+// entity Order {
+//     clientGender : Gender;
+//     status       : Integer enum {
+//         submitted = 1;
+//         fulfiller = 2;
+//         shipped = 3;
+//         cancel = -1;
+//     };
+//     Priority     : String @assert.range enum {
+//         high;
+//         medium;
+//         low;
+//     };
+// };
 
-entity Car {
-    key     ID         : UUID;
-            name       : String;
-    virtual discount_1 : Decimal;
-    virtual discount_2 : Decimal;
-};
+// entity Car {
+//     key     ID         : UUID;
+//             name       : String;
+//     virtual discount_1 : Decimal;
+//     virtual discount_2 : Decimal;
+// };
 
 
 // Entidades
@@ -134,4 +134,74 @@ entity SalesData {
     key ID           : UUID;
         DeliveryDate : DateTime;
         Revenue      : Decimal(16, 2);
+};
+
+
+/* Vistas */
+
+entity SelProducts   as select from Products;
+
+entity SelProducts1  as
+    select from Products {
+        *
+    };
+
+entity SelProducts2  as
+    select from Products {
+        Name,
+        Price,
+        Quantity,
+    };
+
+entity SelProducts3  as
+    select from Products
+    left join ProductReview
+        on Products.Name = ProductReview.Name
+    {
+        Rating,
+        Products.Name,
+        Sum(Products.Price) as TotalPrice,
+    }
+    group by
+        Rating,
+        Products.Name
+    order by
+        Rating;
+
+
+/* Vistas de proyección */
+
+entity ProjProducts  as projection on Products;
+
+entity ProjProducts2 as
+    projection on Products {
+        *
+    };
+
+entity ProjProducts3 as
+    projection on Products {
+        ReleaseDate,
+        Name
+    };
+
+
+/* Vistas con parámetros */
+// entity ParamProducts(pName : String)     as
+//     select from Products {
+//         Name,
+//         Price,
+//         Quantity
+//     }
+//     where
+//         Name = :pName;
+
+
+// entity ProjParamProducts(pName : String) as projection on Products
+//                                             where
+//                                                 Name = :pName;
+
+/* Extensión de entidades */
+extend Products with {
+    PriceCondition     : String(2);
+    PriceDetermination : String(3);
 };
